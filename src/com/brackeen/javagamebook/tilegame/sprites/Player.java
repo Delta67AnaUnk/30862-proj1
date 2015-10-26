@@ -21,6 +21,7 @@ public class Player extends Creature {
         super(left, right, deadLeft, deadRight);
         ShootSwitch(false);
         shootct = 0;
+        health = 55;
     }
 
 
@@ -58,14 +59,15 @@ public class Player extends Creature {
     
     public void setHealth(int h){
     	health = h;
-    	if(h<=0){
+    	if(health<=0){
     		setState(STATE_DYING);
     	}
     }
     
     public void lossHealth(int h){
-    	health -= h;
-    	if(h<=0){
+    	health = health - h;
+    	System.out.println("");
+    	if(health<=0){
     		setState(STATE_DYING);
     	}
     }
@@ -83,8 +85,9 @@ public class Player extends Creature {
     
     
     public void shootState(boolean b){
+    	//System.out.println("Debug Use");
     	if(getState()==STATE_DYING||getState()==STATE_DEAD){
-    		ShootSwitch(false);
+    		b=false;
     		shootct = 0;
     	}
     	ShootSwitch(b);
@@ -108,6 +111,6 @@ public class Player extends Creature {
     }
 
     public long timv(){
-    	return 400;
+    	return 550;
     }
 }

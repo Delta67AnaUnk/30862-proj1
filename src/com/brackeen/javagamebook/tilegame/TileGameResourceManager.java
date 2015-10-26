@@ -316,8 +316,8 @@ public class TileGameResourceManager extends ResourceManager {
     
     private Animation createBulletDeadAnim(Image img1, Image img2){
     	Animation anim = new Animation();
-    	anim.addFrame(img1, 100);
-    	anim.addFrame(img2, 100);
+    	anim.addFrame(img1, 35);
+    	anim.addFrame(img2, 35);
     	return anim;
     }
 

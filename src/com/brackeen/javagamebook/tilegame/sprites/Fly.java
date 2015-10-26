@@ -24,7 +24,7 @@ public class Fly extends Creature {
     }
 
     public long timv(){
-    	return 800;
+    	return 1100;
     }
     
     public boolean isShooting(){

@@ -27,6 +27,7 @@ public abstract class Creature extends Sprite {
     private long stateTime;
     private boolean isShooting; //State Machine
     private long shoottime; //add with elapsed time and compare with timv
+    private boolean face;
     /**
         Creates a new Creature with the specified Animations.
     */
@@ -160,6 +161,9 @@ public abstract class Creature extends Sprite {
     }
 
 
+    public boolean getface(){
+    	return face;
+    }
     /**
         Updates the animaton for this creature.
     */
@@ -168,15 +172,19 @@ public abstract class Creature extends Sprite {
         Animation newAnim = anim;
         if (getVelocityX() < 0) {
             newAnim = left;
+            face = true;
         }
         else if (getVelocityX() > 0) {
             newAnim = right;
+            face = false;
         }
         if (state == STATE_DYING && newAnim == left) {
             newAnim = deadLeft;
+            face = true;
         }
         else if (state == STATE_DYING && newAnim == right) {
             newAnim = deadRight;
+            face = false;
         }
 
         // update the Animation

@@ -17,7 +17,7 @@ public class TileMap {
     private Image[][] tiles;
     private LinkedList sprites;
     private Sprite player;
-
+    private LinkedList<Sprite> tmpbullets;
     /**
         Creates a new TileMap with the specified width and
         height (in number of tiles) of the map.
@@ -25,6 +25,7 @@ public class TileMap {
     public TileMap(int width, int height) {
         tiles = new Image[width][height];
         sprites = new LinkedList();
+        tmpbullets = new LinkedList<Sprite>();
     }
 
 
@@ -93,6 +94,19 @@ public class TileMap {
     }
 
 
+    public void addTmpBullet(Sprite bullet){
+    	tmpbullets.add(bullet);
+    }
+    
+    public void TmpFlush(){
+    	tmpbullets.clear();
+    }
+    
+    public void DumpTmp(){
+    	for(Sprite sp:tmpbullets){
+    		sprites.add(sp);
+    	}
+    }
     /**
         Removes a Sprite object from this map.
     */

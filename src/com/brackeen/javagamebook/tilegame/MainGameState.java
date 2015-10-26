@@ -55,8 +55,7 @@ public class MainGameState implements GameState {
             GameAction.DETECT_INITAL_PRESS_ONLY);
         exit = new GameAction("exit",
             GameAction.DETECT_INITAL_PRESS_ONLY);
-        shoot = new GameAction("shoot",
-        	GameAction.DETECT_INITAL_PRESS_ONLY);
+        shoot = new GameAction("shoot");
         
         renderer = new TileMapRenderer();
         toggleDrumPlayback();
@@ -145,9 +144,10 @@ public class MainGameState implements GameState {
                 player.jump(false);
             }
             if (shoot.isPressed()){
-            	player.shootState(true);
+            	player.ShootSwitch(true);
             }else{
-            	player.shootState(false);
+            	player.ShootSwitch(false);
+            	player.setshoottime(0);
             }
             player.setVelocityX(velocityX);
         }
@@ -239,7 +239,8 @@ public class MainGameState implements GameState {
             Sprite otherSprite = (Sprite)i.next();
             if (isCollision(sprite, otherSprite)) {
                 // collision found, return the Sprite
-                return otherSprite;
+            	///////if(!(otherSprite instanceof Bullet))
+            		return otherSprite;
             }
         }
 
@@ -265,11 +266,12 @@ public class MainGameState implements GameState {
         checkInput(elapsedTime);
 
         // update player
-        updateCreature(player, elapsedTime);
+        Bullet playerbullet = updateCreature(player, elapsedTime);
+        if(playerbullet!=null) 
+        	map.addTmpBullet(playerbullet);
         player.update(elapsedTime);
 
         // update other sprites
-        LinkedList<Bullet> bullets = new LinkedList<Bullet>();
         Iterator i = map.getSprites();
         while (i.hasNext()) {
             Sprite sprite = (Sprite)i.next();
@@ -281,17 +283,15 @@ public class MainGameState implements GameState {
                 else {
                     Bullet newb = updateCreature(creature, elapsedTime);
                     if(newb!=null){
-                    	bullets.add(newb);
+                    	map.addTmpBullet(newb);
                     }
                 }
             }
             // normal update
             sprite.update(elapsedTime);
         }
-        for(Bullet bt: bullets){
-        	map.addSprite(bt);
-        }
-        bullets.clear();
+        map.DumpTmp();
+        map.TmpFlush();
     }
 
 
@@ -302,6 +302,16 @@ public class MainGameState implements GameState {
     private Bullet updateCreature(Creature creature,
         long elapsedTime)
     {
+    	Player py = (Player)map.getPlayer();
+    	// Bullet Shot on Victim
+        if (creature instanceof Bullet){
+        	Creature victim = checkBulletCollision((Bullet)creature);
+        	if(victim!=null){
+        		creature.setState(Creature.STATE_DYING);
+        		victim.setState(Creature.STATE_DYING);
+        	}
+        }
+        
         // apply gravity
         if (!creature.isFlying()) {
             creature.setVelocityY(creature.getVelocityY() +
@@ -312,6 +322,7 @@ public class MainGameState implements GameState {
         float dx = creature.getVelocityX();
         float oldX = creature.getX();
         float newX = oldX + dx * elapsedTime;
+        
         Point tile =
             getTileCollision(creature, newX, creature.getY());
         if (tile == null) {
@@ -337,19 +348,7 @@ public class MainGameState implements GameState {
         if (creature instanceof Player) {
             checkPlayerCollision((Player)creature, false);
         }
-        // Bullet Shot on Victim
-        if (creature instanceof Bullet){
-        	Creature victim = checkBulletCollision((Bullet)creature);
-        	if(victim!=null){
-        		creature.setState(Creature.STATE_DYING);
-        		if(!(victim instanceof Player)){
-        			victim.setState(Creature.STATE_DYING);
-        		}else{
-        			Player py = (Player)victim;
-        			py.lossHealth(5);
-        		}
-        	}
-        }
+        
 
         // change y
         float dy = creature.getVelocityY();
@@ -387,17 +386,35 @@ public class MainGameState implements GameState {
         		creature.setshoottime(creature.getshoottime()-creature.timv());
         	}
         	if(flag){
+        		if((creature instanceof Grub)||(creature instanceof Fly)){
+        			if((creature.getVelocityX()>0)&&(creature.getX()>py.getX()))
+        				flag = false;
+        			else if ((creature.getVelocityX()<0)&&(creature.getX()<py.getX()))
+        				flag = false;
+        		}
+        	}
+        	if(flag){
 	        	Bullet newb = (Bullet)resourceManager.bulletSprite.clone();
-	        	newb.setX(creature.getX()+creature.getWidth()/2);
-	        	newb.setY(creature.getY()-creature.getHeight()/2);
+	        	newb.setX(creature.getX());
+	        	newb.setY(creature.getY()+creature.getHeight()-45);
 	        	
 	        	if(creature instanceof Player){
 	        		newb.setOwner(true);
-	        		newb.setVelocityX(newb.getVelocityX());
-	        		
+	        		if(creature.getface()==true){
+	        			newb.setVelocityX(-1*newb.getMaxSpeed());
+	        		}else{
+	        			newb.setVelocityX(newb.getMaxSpeed());
+	        		}
 	        	}else{
 	        		newb.setOwner(false);
-	        		newb.setVelocityX(-newb.getVelocityX());
+	        		if(creature.getface()==true){
+	        			//System.out.println("left");
+	        			newb.setVelocityX(-1*newb.getMaxSpeed());
+	        		}
+	        		else{
+	        			//System.out.println("right");
+	        			newb.setVelocityX(newb.getMaxSpeed());
+	        		}
 	        	}
 	        	return newb;
         	}
@@ -446,6 +463,15 @@ public class MainGameState implements GameState {
         Sprite collisionSprite = getSpriteCollision(player);
         if (collisionSprite instanceof PowerUp) {
             acquirePowerUp((PowerUp)collisionSprite);
+        }
+        else if(collisionSprite instanceof Bullet){
+        	Bullet bt = (Bullet)collisionSprite;
+        	if(bt.isAlive()==true){
+	        	if(bt.getOwner()==false){
+	        		bt.setState(Creature.STATE_DYING);
+	        		player.lossHealth(5);
+	        	}
+        	}
         }
         else if (collisionSprite instanceof Creature) {
             Creature badguy = (Creature)collisionSprite;

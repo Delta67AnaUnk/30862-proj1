@@ -86,7 +86,7 @@ public abstract class GameCore {
         screen.setFullScreen(displayMode);
 
         Window window = screen.getFullScreenWindow();
-        window.setFont(new Font("Media", Font.PLAIN, FONT_SIZE));
+        window.setFont(new Font("SERIF", Font.PLAIN, FONT_SIZE));
         window.setBackground(Color.blue);
         window.setForeground(Color.white);
 
