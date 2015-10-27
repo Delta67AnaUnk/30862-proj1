@@ -347,6 +347,12 @@ public class MainGameState implements GameState {
         }
         if (creature instanceof Player) {
             checkPlayerCollision((Player)creature, false);
+            Player.distx += (newX - oldX);
+            //System.out.println(Player.dist);
+            if (Player.distx > 63.9 | Player.distx < -63.9){
+            	py.addHealth(1);
+            	Player.distx = 0;
+            }
         }
         
 
@@ -374,6 +380,21 @@ public class MainGameState implements GameState {
         if (creature instanceof Player) {
             boolean canKill = (oldY < creature.getY());
             checkPlayerCollision((Player)creature, canKill);
+            Player.disty += (newY - oldY);
+            //System.out.println(Player.dist);
+            if (Player.disty > 63.9 | Player.disty < -63.9){
+            	py.addHealth(1);
+            	Player.disty = 0;
+            }
+        }
+        
+        // no motion, add health
+        if (dx == 0 && dy == 0){     	
+        	py.sethealthtime(py.gethealthtime()+elapsedTime);
+        	if (py.gethealthtime() > 10000){
+            	py.addHealth(5);      // not moving
+            	py.sethealthtime(0);
+        	}
         }
         
         //改这里
