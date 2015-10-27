@@ -11,9 +11,18 @@ public class Player extends Creature {
 
     private boolean onGround;
     
-    private int health;
+    private int health = 20;
+    
+    public static float distx = 0;
+    public static float disty = 0;
     
     private int shootct;
+    
+    
+    private boolean isadd; //State Machine
+    private long addingtime; //add with elapsed time and compare with timv
+    
+    
     
     public Player(Animation left, Animation right,
         Animation deadLeft, Animation deadRight)
@@ -51,17 +60,30 @@ public class Player extends Creature {
     public void wakeUp() {
         // do nothing
     }
-
-
-    public int getHealth(){
-    	return health;
+    
+    /*public void setHealth(){
+    	health = 20;
+    }*/
+    
+    public boolean isadding(){
+    	return isadd;
     }
     
-    public void setHealth(int h){
-    	health = h;
-    	if(health<=0){
-    		setState(STATE_DYING);
-    	}
+    
+    public long gethealthtime(){
+    	return addingtime;
+    }
+    
+    public void sethealthtime(long time){
+    	addingtime = time;
+    }
+    
+    public void getHealth() {
+        //return health;
+    	System.out.println("Current Health is: " + health);
+    }
+    public int getaHealth() {
+        return health;
     }
     
     public void lossHealth(int h){
@@ -71,6 +93,14 @@ public class Player extends Creature {
     		setState(STATE_DYING);
     	}
     }
+    
+    public void addHealth(int h){
+    	health += h;
+    	if(health > 40){
+    		health = 40;
+    	}
+    }
+    
     /**
         Makes the player jump if the player is on the ground or
         if forceJump is true.

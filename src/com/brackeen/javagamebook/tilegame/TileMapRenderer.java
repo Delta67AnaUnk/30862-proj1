@@ -5,6 +5,7 @@ import java.util.Iterator;
 
 import com.brackeen.javagamebook.graphics.Sprite;
 import com.brackeen.javagamebook.tilegame.sprites.Creature;
+import com.brackeen.javagamebook.tilegame.sprites.Player;
 
 /**
     The TileMapRenderer class draws a TileMap on the screen.
@@ -91,6 +92,7 @@ public class TileMapRenderer {
         // get the y offset to draw all sprites and tiles
         int offsetY = screenHeight -
             tilesToPixels(map.getHeight());
+        
 
         // draw black background, if needed
         if (background == null ||
@@ -125,6 +127,12 @@ public class TileMapRenderer {
                 }
             }
         }
+        
+        // !!!!!!!!
+        Player py = (Player)map.getPlayer();
+        g.setColor(Color. red);
+        String health = "health: " + py.getaHealth();
+        g.drawString(health, 20, 30);
 
         // draw player
         g.drawImage(player.getImage(),
