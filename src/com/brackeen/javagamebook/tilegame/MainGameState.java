@@ -31,6 +31,9 @@ public class MainGameState implements GameState {
     private Sound prizeSound;
     private Sound boopSound;
     private Sequence music;
+    private Sound KillSE;
+    private Sound ShootSE;
+    private Sound HitSE;
     private TileMap map;
     private TileMapRenderer renderer;
 
@@ -85,6 +88,9 @@ public class MainGameState implements GameState {
         // load sounds
         prizeSound = resourceManager.loadSound("sounds/prize.wav");
         boopSound = resourceManager.loadSound("sounds/boop2.wav");
+        ShootSE = resourceManager.loadSound("sounds/page.wav");
+        HitSE = resourceManager.loadSound("sounds/page.wav");
+        KillSE = resourceManager.loadSound("sounds/page.wav");
         music = resourceManager.loadSequence("sounds/music.midi");
     }
 
@@ -144,10 +150,42 @@ public class MainGameState implements GameState {
                 player.jump(false);
             }
             if (shoot.isPressed()){
-            	player.ShootSwitch(true);
+            	if(player.isShooting()==false&&(!player.isHold())){
+            		player.clearcount();
+            		player.setshoottime(0);
+	            	if(player.isAlive()){
+	            		player.ShootSwitch(true);
+	            		Bullet newb = (Bullet)resourceManager.bulletSprite.clone();
+	    	        	newb.setX(player.getX());
+	    	        	newb.setY(player.getY()+player.getHeight()-45);
+	    	        	newb.setOwner(true);
+	    	        	if(player.getface()==true){
+	    	        		newb.setVelocityX(-1*newb.getMaxSpeed());
+	    	        	}else{
+	    	        		newb.setVelocityX(newb.getMaxSpeed());
+	    	        	}
+	    	        	map.addTmpBullet(newb);
+	    	        	soundManager.play(ShootSE);
+	            	}
+            	}
             }else{
-            	player.ShootSwitch(false);
-            	player.setshoottime(0);
+            	if(!player.isHold()){
+	            	if(player.getshoottime()>=player.timv()){
+		            	player.setshoottime(0);
+		            	player.holdSwitch(true);
+		            	player.resetcount();
+	            	}else{
+	            		player.ShootSwitch(false);
+	            		player.setshoottime(0);
+	            	}
+            	}
+            	else{
+            		if(player.getshoottime()>3000){
+                		player.ShootSwitch(false);
+                		player.holdSwitch(false);
+                		player.setshoottime(0);
+                	}
+            	}
             }
             player.setVelocityX(velocityX);
         }
@@ -259,6 +297,10 @@ public class MainGameState implements GameState {
         // player is dead! start map over
         if (player.getState() == Creature.STATE_DEAD) {
             map = resourceManager.reloadMap();
+            Player p = (Player) player;
+            p.holdSwitch(false);
+            p.setshoottime(0);
+            p.ShootSwitch(false);
             return;
         }
 
@@ -266,9 +308,9 @@ public class MainGameState implements GameState {
         checkInput(elapsedTime);
 
         // update player
-        Bullet playerbullet = updateCreature(player, elapsedTime);
-        if(playerbullet!=null) 
-        	map.addTmpBullet(playerbullet);
+        updateCreature(player, elapsedTime);
+        //if(playerbullet!=null) 
+        //	map.addTmpBullet(playerbullet);
         player.update(elapsedTime);
 
         // update other sprites
@@ -281,10 +323,7 @@ public class MainGameState implements GameState {
                     i.remove();
                 }
                 else {
-                    Bullet newb = updateCreature(creature, elapsedTime);
-                    if(newb!=null){
-                    	map.addTmpBullet(newb);
-                    }
+                    updateCreature(creature, elapsedTime);
                 }
             }
             // normal update
@@ -299,7 +338,7 @@ public class MainGameState implements GameState {
         Updates the creature, applying gravity for creatures that
         aren't flying, and checks collisions.
     */
-    private Bullet updateCreature(Creature creature,
+    private void updateCreature(Creature creature,
         long elapsedTime)
     {
     	Player py = (Player)map.getPlayer();
@@ -332,7 +371,7 @@ public class MainGameState implements GameState {
             // line up with the tile boundary
         	if (creature instanceof Bullet){
         		creature.setState(Creature.STATE_DYING);
-        		// 好像需要声音？
+        		soundManager.play(KillSE);
         	}
             if (dx > 0) {
                 creature.setX(
@@ -397,50 +436,58 @@ public class MainGameState implements GameState {
         	}
         }
         
-        //改这里
         // Shooting 
         if (creature.isShooting()){
         	creature.setshoottime(creature.getshoottime()+elapsedTime);
+        	if(creature instanceof Player){
+    			if(py.isHold()&&py.getcount()>=0){
+    				if(py.getshoottime()>(10-py.getcount())*100){
+    					Bullet pshoot = (Bullet)resourceManager.bulletSprite.clone();
+    					pshoot.setX(py.getX());
+    		        	pshoot.setY(py.getY()+py.getHeight()-45);
+    		        	pshoot.setOwner(true);
+    		        	if(py.getface()==true){
+    		        		pshoot.setVelocityX(-1*pshoot.getMaxSpeed());
+    		        	}
+    		        	else{
+    		        		pshoot.setVelocityX(pshoot.getMaxSpeed());
+    		        	}
+    		        	map.addTmpBullet(pshoot);
+    		        	soundManager.play(ShootSE);
+    		        	py.count();
+    				}
+    			}
+    			return;
+    		}
         	boolean flag = false;
         	if(creature.getshoottime()>=creature.timv()){
         		flag = true;
         		creature.setshoottime(creature.getshoottime()-creature.timv());
         	}
         	if(flag){
-        		if((creature instanceof Grub)||(creature instanceof Fly)){
-        			if((creature.getVelocityX()>0)&&(creature.getX()>py.getX()))
-        				flag = false;
-        			else if ((creature.getVelocityX()<0)&&(creature.getX()<py.getX()))
-        				flag = false;
-        		}
+        		if((creature.getVelocityX()>0)&&(creature.getX()>py.getX()))
+        			flag = false;
+        		else if ((creature.getVelocityX()<0)&&(creature.getX()<py.getX()))
+        			flag = false;
         	}
         	if(flag){
 	        	Bullet newb = (Bullet)resourceManager.bulletSprite.clone();
 	        	newb.setX(creature.getX());
 	        	newb.setY(creature.getY()+creature.getHeight()-45);
-	        	
-	        	if(creature instanceof Player){
-	        		newb.setOwner(true);
-	        		if(creature.getface()==true){
-	        			newb.setVelocityX(-1*newb.getMaxSpeed());
-	        		}else{
-	        			newb.setVelocityX(newb.getMaxSpeed());
-	        		}
-	        	}else{
-	        		newb.setOwner(false);
-	        		if(creature.getface()==true){
-	        			//System.out.println("left");
-	        			newb.setVelocityX(-1*newb.getMaxSpeed());
-	        		}
-	        		else{
-	        			//System.out.println("right");
-	        			newb.setVelocityX(newb.getMaxSpeed());
-	        		}
+	        	newb.setOwner(false);
+	        	if(creature.getface()==true){
+	        		//System.out.println("left");
+	        		newb.setVelocityX(-1*newb.getMaxSpeed());
 	        	}
-	        	return newb;
+	        	else{
+	        		//System.out.println("right");
+	        		newb.setVelocityX(newb.getMaxSpeed());
+	        	}
+	        	map.addTmpBullet(newb);
+	        	soundManager.play(ShootSE);
         	}
         }
-        return null;
+        return;
     }
 
     public Creature checkBulletCollision(Bullet bullet){
@@ -491,6 +538,7 @@ public class MainGameState implements GameState {
 	        	if(bt.getOwner()==false){
 	        		bt.setState(Creature.STATE_DYING);
 	        		player.lossHealth(5);
+	        		soundManager.play(HitSE);
 	        	}
         	}
         }

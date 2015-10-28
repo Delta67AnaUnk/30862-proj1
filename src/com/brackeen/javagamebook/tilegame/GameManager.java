@@ -25,7 +25,7 @@ public class GameManager extends GameCore {
     // uncompressed, 44100Hz, 16-bit, mono, signed, little-endian
     private static final AudioFormat PLAYBACK_FORMAT =
         new AudioFormat(44100, 16, 1, true, false);
-
+    	
 
     private MidiPlayer midiPlayer;
     private SoundManager soundManager;

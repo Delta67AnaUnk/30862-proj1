@@ -17,7 +17,7 @@ public class Player extends Creature {
     public static float disty = 0;
     
     private int shootct;
-    
+    private boolean hold;
     
     private boolean isadd; //State Machine
     private long addingtime; //add with elapsed time and compare with timv
@@ -31,6 +31,8 @@ public class Player extends Creature {
         ShootSwitch(false);
         shootct = 0;
         health = 55;
+        shootct = 0;
+        hold = false;
     }
 
 
@@ -114,7 +116,7 @@ public class Player extends Creature {
     
     
     
-    public void shootState(boolean b){
+    /*public void shootState(boolean b){
     	//System.out.println("Debug Use");
     	if(getState()==STATE_DYING||getState()==STATE_DEAD){
     		b=false;
@@ -122,25 +124,37 @@ public class Player extends Creature {
     	}
     	ShootSwitch(b);
     	if(!b)shootct = 0;
-    }
+    }*/
     
     public int getcount(){
     	return shootct;
     }
     
-    public void resetcountt(){
+    public void resetcount(){
+    	shootct = 10;
+    }
+    
+    public void clearcount(){
     	shootct = 0;
     }
     
-    public void countup(){
-    	shootct++;
+    public void count(){
+    	shootct--;
     }
 
+    public void holdSwitch(boolean b){
+    	hold = b;
+    }
+    
+    public boolean isHold(){
+    	return hold;
+    }
+    
     public float getMaxSpeed() {
         return 0.5f;
     }
 
     public long timv(){
-    	return 550;
+    	return 1500;
     }
 }
