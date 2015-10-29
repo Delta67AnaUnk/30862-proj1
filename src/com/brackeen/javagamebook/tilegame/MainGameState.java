@@ -165,7 +165,7 @@ public class MainGameState implements GameState {
 	    	        		newb.setVelocityX(newb.getMaxSpeed());
 	    	        	}
 	    	        	map.addTmpBullet(newb);
-	    	        	soundManager.play(ShootSE);
+	    	        	//soundManager.play(ShootSE);
 	            	}
             	}
             }else{
@@ -371,7 +371,7 @@ public class MainGameState implements GameState {
             // line up with the tile boundary
         	if (creature instanceof Bullet){
         		creature.setState(Creature.STATE_DYING);
-        		soundManager.play(KillSE);
+        		//soundManager.play(KillSE);
         	}
             if (dx > 0) {
                 creature.setX(
@@ -453,7 +453,7 @@ public class MainGameState implements GameState {
     		        		pshoot.setVelocityX(pshoot.getMaxSpeed());
     		        	}
     		        	map.addTmpBullet(pshoot);
-    		        	soundManager.play(ShootSE);
+    		        	//soundManager.play(ShootSE);
     		        	py.count();
     				}
     			}
@@ -484,7 +484,7 @@ public class MainGameState implements GameState {
 	        		newb.setVelocityX(newb.getMaxSpeed());
 	        	}
 	        	map.addTmpBullet(newb);
-	        	soundManager.play(ShootSE);
+	        	//soundManager.play(ShootSE);
         	}
         }
         return;
@@ -538,7 +538,7 @@ public class MainGameState implements GameState {
 	        	if(bt.getOwner()==false){
 	        		bt.setState(Creature.STATE_DYING);
 	        		player.lossHealth(5);
-	        		soundManager.play(HitSE);
+	        		//soundManager.play(HitSE);
 	        	}
         	}
         }
