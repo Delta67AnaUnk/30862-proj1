@@ -5,6 +5,7 @@ import java.util.Iterator;
 
 import com.brackeen.javagamebook.graphics.Sprite;
 import com.brackeen.javagamebook.tilegame.sprites.Creature;
+import com.brackeen.javagamebook.tilegame.sprites.Fly;
 import com.brackeen.javagamebook.tilegame.sprites.Player;
 
 /**
