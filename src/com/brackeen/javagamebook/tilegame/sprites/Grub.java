@@ -23,6 +23,6 @@ public class Grub extends Creature {
     }
     
     public boolean isShooting(){
-    	return isAlive();
+    	return false;
     }
 }

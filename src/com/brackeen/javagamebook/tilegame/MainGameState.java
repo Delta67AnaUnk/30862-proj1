@@ -4,8 +4,10 @@ import java.awt.*;
 import java.util.LinkedList;
 import java.awt.event.KeyEvent;
 import java.util.Iterator;
+
 import javax.sound.midi.Sequence;
 import javax.sound.midi.Sequencer;
+
 
 
 import com.brackeen.javagamebook.graphics.*;
@@ -33,7 +35,8 @@ public class MainGameState implements GameState {
     private Sequence music;
     private Sound KillSE;
     private Sound ShootSE;
-    private Sound HitSE;
+    private Sound MultShootSE;
+    private Sound SelfDeadSE;
     private TileMap map;
     private TileMapRenderer renderer;
 
@@ -89,8 +92,9 @@ public class MainGameState implements GameState {
         prizeSound = resourceManager.loadSound("sounds/prize.wav");
         boopSound = resourceManager.loadSound("sounds/boop2.wav");
         ShootSE = resourceManager.loadSound("sounds/page.wav");
-        HitSE = resourceManager.loadSound("sounds/page.wav");
+        MultShootSE = resourceManager.loadSound("sounds/Shooting.wav");
         KillSE = resourceManager.loadSound("sounds/page.wav");
+        SelfDeadSE = resourceManager.loadSound("sounds/ahaha.wav");
         music = resourceManager.loadSequence("sounds/music.midi");
     }
 
@@ -165,12 +169,13 @@ public class MainGameState implements GameState {
 	    	        		newb.setVelocityX(newb.getMaxSpeed());
 	    	        	}
 	    	        	map.addTmpBullet(newb);
-	    	        	//soundManager.play(ShootSE);
+	    	        	soundManager.play(ShootSE);
 	            	}
             	}
             }else{
             	if(!player.isHold()){
 	            	if(player.getshoottime()>=player.timv()){
+	            		soundManager.play(MultShootSE);
 		            	player.setshoottime(0);
 		            	player.holdSwitch(true);
 		            	player.resetcount();
@@ -309,8 +314,6 @@ public class MainGameState implements GameState {
 
         // update player
         updateCreature(player, elapsedTime);
-        //if(playerbullet!=null) 
-        //	map.addTmpBullet(playerbullet);
         player.update(elapsedTime);
 
         // update other sprites
@@ -371,7 +374,7 @@ public class MainGameState implements GameState {
             // line up with the tile boundary
         	if (creature instanceof Bullet){
         		creature.setState(Creature.STATE_DYING);
-        		//soundManager.play(KillSE);
+        		soundManager.play(KillSE);
         	}
             if (dx > 0) {
                 creature.setX(
@@ -387,14 +390,12 @@ public class MainGameState implements GameState {
         if (creature instanceof Player) {
             checkPlayerCollision((Player)creature, false);
             Player.distx += (newX - oldX);
-            //System.out.println(Player.dist);
             if (Player.distx > 63.9 | Player.distx < -63.9){
             	py.addHealth(1);
             	Player.distx = 0;
             }
         }
         
-
         // change y
         float dy = creature.getVelocityY();
         float oldY = creature.getY();
@@ -433,6 +434,21 @@ public class MainGameState implements GameState {
         	if (py.gethealthtime() > 10000){
             	py.addHealth(5);      // not moving
             	py.sethealthtime(0);
+        	}
+        }
+        
+        //Fly
+        if(creature instanceof Fly) {
+        	if(creature.isShooting()){
+        		if(!creature.getface()&&py.getX()<creature.getX()){
+        			creature.setVelocityX(-creature.getVelocityX());
+        		}else if(creature.getface()&&py.getX()>creature.getX()){
+        			creature.setVelocityX(-creature.getVelocityX());
+        		}
+        		float Ydist = -creature.getY()+py.getY();
+        		creature.setVelocityY(Ydist/25);
+        	}else{
+	        	if(creature.getAppearTime()>550) creature.ShootSwitch(true);
         	}
         }
         
@@ -538,6 +554,7 @@ public class MainGameState implements GameState {
 	        	if(bt.getOwner()==false){
 	        		bt.setState(Creature.STATE_DYING);
 	        		player.lossHealth(5);
+	        		if(!player.isAlive())soundManager.play(SelfDeadSE);
 	        		//soundManager.play(HitSE);
 	        	}
         	}
@@ -553,6 +570,7 @@ public class MainGameState implements GameState {
             }
             else {
                 // player dies!
+            	soundManager.play(SelfDeadSE);
                 player.setState(Creature.STATE_DYING);
             }
         }

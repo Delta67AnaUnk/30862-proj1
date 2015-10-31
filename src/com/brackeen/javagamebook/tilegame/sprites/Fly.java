@@ -27,7 +27,4 @@ public class Fly extends Creature {
     	return 1100;
     }
     
-    public boolean isShooting(){
-    	return isAlive();
-    }
 }
