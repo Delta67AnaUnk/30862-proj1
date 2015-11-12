@@ -98,8 +98,8 @@ public class Player extends Creature {
     
     public void addHealth(int h){
     	health += h;
-    	if(health > 40){
-    		health = 40;
+    	if(health > 400){
+    		health = 400;
     	}
     }
     

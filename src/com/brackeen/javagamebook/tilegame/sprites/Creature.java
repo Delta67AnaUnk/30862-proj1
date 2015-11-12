@@ -84,8 +84,6 @@ public abstract class Creature extends Sprite {
         if (getState() == STATE_NORMAL && getVelocityX() == 0) {
             setVelocityX(-getMaxSpeed());
         }
-        appearTime = 0;
-        isShooting = false;
         waked = true;
     }
     
@@ -181,7 +179,8 @@ public abstract class Creature extends Sprite {
     public void update(long elapsedTime) {
         // select the correct Animation
         Animation newAnim = anim;
-        appearTime+=elapsedTime;
+        if(waked&&appearTime<1000)
+        	appearTime+=elapsedTime;
         if (getVelocityX() < 0) {
             newAnim = left;
             face = true;

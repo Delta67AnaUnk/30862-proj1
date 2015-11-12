@@ -93,7 +93,7 @@ public class MainGameState implements GameState {
         boopSound = resourceManager.loadSound("sounds/boop2.wav");
         ShootSE = resourceManager.loadSound("sounds/page.wav");
         MultShootSE = resourceManager.loadSound("sounds/Shooting.wav");
-        KillSE = resourceManager.loadSound("sounds/page.wav");
+        KillSE = resourceManager.loadSound("sounds/kl.wav");
         SelfDeadSE = resourceManager.loadSound("sounds/ahaha.wav");
         music = resourceManager.loadSequence("sounds/music.midi");
     }
@@ -351,6 +351,7 @@ public class MainGameState implements GameState {
         	if(victim!=null){
         		creature.setState(Creature.STATE_DYING);
         		victim.setState(Creature.STATE_DYING);
+        		py.addHealth(10);
         	}
         }
         
@@ -360,10 +361,35 @@ public class MainGameState implements GameState {
                 GRAVITY * elapsedTime);
         }
         
+        if(creature instanceof Fly&&creature.isWaked()) {
+        	if(creature.isShooting()){
+        		if(!creature.getface()&&py.getX()<creature.getX()){
+        			creature.setVelocityX(-creature.getVelocityX());
+        		}else if(creature.getface()&&py.getX()>creature.getX()){
+        			creature.setVelocityX(-creature.getVelocityX());
+        		}
+        		float Ydist = py.getY()-creature.getY();
+        		creature.setVelocityY(Ydist/900);
+        	}else{
+        		Fly fly = (Fly)creature;
+        		if(fly.isChecked()){
+        			if(Math.abs(py.getX()-fly.getRecPlace())>128.0){
+        				creature.ShootSwitch(true);
+        			}
+        		}else{
+        			fly.check();
+        			fly.recPlace(py.getX());
+        		}
+	        	if(creature.getAppearTime()>550) creature.ShootSwitch(true);
+        	}
+        }
+        
+        
         // change x
         float dx = creature.getVelocityX();
         float oldX = creature.getX();
         float newX = oldX + dx * elapsedTime;
+        
         
         Point tile =
             getTileCollision(creature, newX, creature.getY());
@@ -374,7 +400,6 @@ public class MainGameState implements GameState {
             // line up with the tile boundary
         	if (creature instanceof Bullet){
         		creature.setState(Creature.STATE_DYING);
-        		soundManager.play(KillSE);
         	}
             if (dx > 0) {
                 creature.setX(
@@ -438,19 +463,7 @@ public class MainGameState implements GameState {
         }
         
         //Fly
-        if(creature instanceof Fly) {
-        	if(creature.isShooting()){
-        		if(!creature.getface()&&py.getX()<creature.getX()){
-        			creature.setVelocityX(-creature.getVelocityX());
-        		}else if(creature.getface()&&py.getX()>creature.getX()){
-        			creature.setVelocityX(-creature.getVelocityX());
-        		}
-        		float Ydist = -creature.getY()+py.getY();
-        		creature.setVelocityY(Ydist/25);
-        	}else{
-	        	if(creature.getAppearTime()>550) creature.ShootSwitch(true);
-        	}
-        }
+        
         
         // Shooting 
         if (creature.isShooting()){
@@ -517,6 +530,7 @@ public class MainGameState implements GameState {
                 // collision found, return the Sprite
             	if(owner){ // user shoot
             		if(otherSprite instanceof Fly|| otherSprite instanceof Grub){
+            			soundManager.play(KillSE);
             			return (Creature)otherSprite;
             		}
             	}else{
@@ -567,6 +581,7 @@ public class MainGameState implements GameState {
                 badguy.setState(Creature.STATE_DYING);
                 player.setY(badguy.getY() - player.getHeight());
                 player.jump(true);
+                player.addHealth(10);
             }
             else {
                 // player dies!
