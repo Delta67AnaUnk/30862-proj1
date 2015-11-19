@@ -27,9 +27,11 @@ public class TileGameResourceManager extends ResourceManager {
     private Sprite musicSprite;
     private Sprite coinSprite;
     private Sprite goalSprite;
+    private Sprite mushSprite;
     private Sprite grubSprite;
     private Sprite flySprite;
     public Sprite bulletSprite;
+    public Sprite starbufSprite;
 
     /**
         Creates a new ResourceManager with the specified
@@ -224,7 +226,10 @@ public class TileGameResourceManager extends ResourceManager {
             loadImage("bt2.png"),
             loadImage("bt3.png"),
             loadImage("btd0.png"),
-            loadImage("btd1.png")
+            loadImage("btd1.png"),
+            loadImage("starbuff1.png"),
+            loadImage("starbuff2.png"),
+            loadImage("starbuff3.png")
         };
 
         images[1] = new Image[images[0].length];
@@ -260,6 +265,9 @@ public class TileGameResourceManager extends ResourceManager {
         bulletAnim[3] = createBulletDeadAnim(images[0][12],images[0][13]);
         bulletAnim[2] = createBulletDeadAnim(images[1][12],images[1][13]);
         
+        Animation starbufAnim = new Animation();
+        starbufAnim = createStarBufAnim(images[0][14],images[0][15],images[0][16]);
+        
         // create creature sprites
         playerSprite = new Player(playerAnim[0], playerAnim[1],
             playerAnim[2], playerAnim[3]);
@@ -269,6 +277,7 @@ public class TileGameResourceManager extends ResourceManager {
             grubAnim[2], grubAnim[3]);
         bulletSprite = new Bullet(bulletAnim[0],bulletAnim[1],
         	bulletAnim[2],bulletAnim[3]);
+        starbufSprite = new Starbuf(starbufAnim,240);
     }
 
 
@@ -320,6 +329,14 @@ public class TileGameResourceManager extends ResourceManager {
     	anim.addFrame(img2, 35);
     	return anim;
     }
+    
+    private Animation createStarBufAnim(Image img1, Image img2, Image img3){
+    	Animation anim = new Animation();
+    	anim.addFrame(img1, 80);
+    	anim.addFrame(img2, 80);
+    	anim.addFrame(img3, 80);
+    	return anim;
+    }
 
     private void loadPowerUpSprites() {
         // create "goal" sprite
@@ -345,6 +362,12 @@ public class TileGameResourceManager extends ResourceManager {
         anim.addFrame(loadImage("music3.png"), 150);
         anim.addFrame(loadImage("music2.png"), 150);
         musicSprite = new PowerUp.Music(anim);
+        
+        // create "mushroom" sprite
+        anim = new Animation();
+        anim.addFrame(loadImage("mush1.png"), 500);
+        anim.addFrame(loadImage("mush2.png"), 500);
+        mushSprite = new PowerUp.Mushroom(anim);
     }
 
 }

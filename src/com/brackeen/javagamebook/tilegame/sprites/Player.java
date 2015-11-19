@@ -21,7 +21,9 @@ public class Player extends Creature {
     
     private boolean isadd; //State Machine
     private long addingtime; //add with elapsed time and compare with timv
-    
+    private boolean invinc;
+    private long invcount;
+    private long invbufcount;
     
     
     public Player(Animation left, Animation right,
@@ -33,6 +35,9 @@ public class Player extends Creature {
         health = 55;
         shootct = 0;
         hold = false;
+        invinc = false;
+        invcount = 0;
+        invbufcount = 0;
     }
 
 
@@ -89,6 +94,7 @@ public class Player extends Creature {
     }
     
     public void lossHealth(int h){
+    	if(invinc) return;
     	health = health - h;
     	System.out.println("");
     	if(health<=0){
@@ -98,8 +104,8 @@ public class Player extends Creature {
     
     public void addHealth(int h){
     	health += h;
-    	if(health > 40){
-    		health = 40;
+    	if(health > 400){
+    		health = 400;
     	}
     }
     
@@ -114,7 +120,40 @@ public class Player extends Creature {
         }
     }
     
+    public boolean IsInvinc() {
+    	return invinc;
+    }
     
+    public boolean IsInvincBuf(){
+    	return invbufcount<=0;
+    }
+    
+    public void RefillInvBuf(){
+    	invbufcount = 400;
+    }
+    
+    public void SetInvinc(boolean b) {
+    	if(b){
+    		invinc = b;
+    		invcount = 2400;
+    		invbufcount = 400;
+    	}else{
+    		invinc = b;
+    		invcount = 0;
+    		invbufcount = 0;
+    	}
+    }
+    
+    public void UpdateInv(long elapsedTime) {
+    	if(invinc){
+    		invcount-=elapsedTime;
+    		invbufcount -=elapsedTime;
+    		if(invcount<=0){
+    			invcount = 0;
+    			invinc = false;
+    		}
+    	}
+    }
     
     /*public void shootState(boolean b){
     	//System.out.println("Debug Use");
