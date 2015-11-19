@@ -32,6 +32,9 @@ public class TileGameResourceManager extends ResourceManager {
     private Sprite flySprite;
     public Sprite bulletSprite;
     public Sprite starbufSprite;
+    public Sprite expoSprite;
+    public Sprite poisSprite;
+    public Sprite stopSprite;
 
     /**
         Creates a new ResourceManager with the specified
@@ -146,6 +149,11 @@ public class TileGameResourceManager extends ResourceManager {
                 else if (ch == '2') {
                     addSprite(newMap, flySprite, x, y);
                 }
+                // Mushroom denoted by 'M'
+                else if (ch == '3') {
+                	addSprite(newMap,mushSprite,x,y);
+                }
+                
             }
         }
 
@@ -158,6 +166,9 @@ public class TileGameResourceManager extends ResourceManager {
         return newMap;
     }
 
+    public Image getTileType(int i){
+    	return (Image)tiles.get(i);
+    }
 
     private void addSprite(TileMap map,
         Sprite hostSprite, int tileX, int tileY)
@@ -216,27 +227,43 @@ public class TileGameResourceManager extends ResourceManager {
             loadImage("player1.png"),
             loadImage("player2.png"),
             loadImage("player3.png"),
-            loadImage("fly1.png"),
+            loadImage("fly1.png"),//3
             loadImage("fly2.png"),
             loadImage("fly3.png"),
-            loadImage("grub1.png"),
+            loadImage("grub1.png"),//6
             loadImage("grub2.png"),
-            loadImage("bt0.png"),
+            loadImage("bt0.png"),//8
             loadImage("bt1.png"),
             loadImage("bt2.png"),
             loadImage("bt3.png"),
-            loadImage("btd0.png"),
+            loadImage("btd0.png"),//12
             loadImage("btd1.png"),
-            loadImage("starbuff1.png"),
+            loadImage("starbuff1.png"),//14
             loadImage("starbuff2.png"),
-            loadImage("starbuff3.png")
+            loadImage("starbuff3.png"),
+            loadImage("Expo1.png"),//17
+            loadImage("Expo2.png"),
+            loadImage("Expo3.png"),
+            loadImage("Expo4.png"),
+            loadImage("Expo5.png"),
+            loadImage("Expo6.png"),
+            loadImage("Expo7.png"),
+            loadImage("Expo8.png"),
+            loadImage("Expo9.png"),
+            loadImage("Expoa.png"),
+            loadImage("Expob.png"),
+            loadImage("Expoc.png"),
+            loadImage("Expod.png"),
+            loadImage("Expoe.png"),
+            loadImage("Expof.png"),
+            loadImage("stop.png") //32
         };
 
-        images[1] = new Image[images[0].length];
-        images[2] = new Image[images[0].length];
-        images[3] = new Image[images[0].length];
+        images[1] = new Image[14];
+        images[2] = new Image[14];
+        images[3] = new Image[14];
 
-        for (int i=0; i<images[0].length; i++) {
+        for (int i=0; i<14; i++) {
             // right-facing images
             images[1][i] = getMirrorImage(images[0][i]);
             // left-facing "dead" images
@@ -265,8 +292,11 @@ public class TileGameResourceManager extends ResourceManager {
         bulletAnim[3] = createBulletDeadAnim(images[0][12],images[0][13]);
         bulletAnim[2] = createBulletDeadAnim(images[1][12],images[1][13]);
         
-        Animation starbufAnim = new Animation();
-        starbufAnim = createStarBufAnim(images[0][14],images[0][15],images[0][16]);
+        Animation starbufAnim = createBufAnim(images[0],14,16,80);
+        
+        Animation expoAnim = createBufAnim(images[0],17,31,40);
+        
+        Animation stopAnim = createBufAnim(images[0],32,32,500);
         
         // create creature sprites
         playerSprite = new Player(playerAnim[0], playerAnim[1],
@@ -277,7 +307,9 @@ public class TileGameResourceManager extends ResourceManager {
             grubAnim[2], grubAnim[3]);
         bulletSprite = new Bullet(bulletAnim[0],bulletAnim[1],
         	bulletAnim[2],bulletAnim[3]);
-        starbufSprite = new Starbuf(starbufAnim,240);
+        starbufSprite = new Starbuf.StarB(starbufAnim,240);
+        expoSprite = new Starbuf.Expo(expoAnim, 600);
+        stopSprite = new Starbuf.Pois(stopAnim, 999999);
     }
 
 
@@ -330,14 +362,16 @@ public class TileGameResourceManager extends ResourceManager {
     	return anim;
     }
     
-    private Animation createStarBufAnim(Image img1, Image img2, Image img3){
+
+    private Animation createBufAnim(Image buf[], int start, int end,int frame){
     	Animation anim = new Animation();
-    	anim.addFrame(img1, 80);
-    	anim.addFrame(img2, 80);
-    	anim.addFrame(img3, 80);
+    	int i = 0;
+    	for (i = start;i<end+1;i++){
+    		anim.addFrame(buf[i], frame);
+    	}
     	return anim;
     }
-
+    
     private void loadPowerUpSprites() {
         // create "goal" sprite
         Animation anim = new Animation();

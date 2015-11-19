@@ -24,6 +24,7 @@ public class Player extends Creature {
     private boolean invinc;
     private long invcount;
     private long invbufcount;
+    private boolean canbepoison;
     
     
     public Player(Animation left, Animation right,
@@ -155,15 +156,13 @@ public class Player extends Creature {
     	}
     }
     
-    /*public void shootState(boolean b){
-    	//System.out.println("Debug Use");
-    	if(getState()==STATE_DYING||getState()==STATE_DEAD){
-    		b=false;
-    		shootct = 0;
-    	}
-    	ShootSwitch(b);
-    	if(!b)shootct = 0;
-    }*/
+    public boolean CanBePoison(){
+    	return canbepoison;
+    }
+    
+    public void PoisonSwitch(boolean b){
+    	canbepoison = b;
+    }
     
     public int getcount(){
     	return shootct;

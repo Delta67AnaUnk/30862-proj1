@@ -69,7 +69,7 @@ public class TileMap {
         tiles[x][y] = tile;
     }
 
-
+ 
     /**
         Gets the player Sprite.
     */

@@ -47,6 +47,7 @@ public class MainGameState implements GameState {
     private GameAction jump;
     private GameAction exit;
     private GameAction shoot;
+    private Starbuf.Pois stopbuf;
 
     public MainGameState(SoundManager soundManager,
         MidiPlayer midiPlayer, int width, int height)
@@ -179,16 +180,21 @@ public class MainGameState implements GameState {
 		            	player.setshoottime(0);
 		            	player.holdSwitch(true);
 		            	player.resetcount();
+		            	stopbuf = (Starbuf.Pois)resourceManager.stopSprite.clone();
+                		stopbuf.setX(player.getX());
+                		stopbuf.setY(player.getY());
+                		map.addTmpBullet(stopbuf);
 	            	}else{
 	            		player.ShootSwitch(false);
 	            		player.setshoottime(0);
 	            	}
             	}
             	else{
-            		if(player.getshoottime()>3000){
+            		if(player.getshoottime()>2700){
                 		player.ShootSwitch(false);
                 		player.holdSwitch(false);
                 		player.setshoottime(0);
+                		map.removeSprite(stopbuf);
                 	}
             	}
             }
@@ -227,6 +233,69 @@ public class MainGameState implements GameState {
                 {
                     // collision found, return the tile
                     pointCache.setLocation(x, y);
+                    if(sprite instanceof Player){
+                    	Player py = (Player)map.getPlayer();
+	                    if(map.getTile(x, y)==resourceManager.getTileType('J'-'A')){
+	                    	// poisoned
+	                    	if(py.CanBePoison()){
+		                    	if (!py.isHold()){
+		                    		py.setshoottime(0);
+		                    		py.holdSwitch(true);
+		                    		py.ShootSwitch(true);
+			                    	stopbuf = (Starbuf.Pois)resourceManager.stopSprite.clone();
+			                		stopbuf.setX(py.getX());
+			                		stopbuf.setY(py.getY());
+			                		map.addTmpBullet(stopbuf);
+		                    	}else{
+		                    		py.setshoottime(py.getshoottime()-1300);
+		                    	}
+	                    	}
+	                    	py.PoisonSwitch(false);
+	                    }
+	                    else if (map.getTile(x, y)==resourceManager.getTileType('K'-'A')){
+	                    	// poisoned
+	                    	if(py.CanBePoison()){
+		                    	if (!py.isHold()){
+		                    		py.setshoottime(0);
+		                    		py.holdSwitch(true);
+		                    		py.ShootSwitch(true);
+			                    	stopbuf = (Starbuf.Pois)resourceManager.stopSprite.clone();
+			                		stopbuf.setX(py.getX());
+			                		stopbuf.setY(py.getY());
+			                		map.addTmpBullet(stopbuf);
+		                    	}else{
+		                    		py.setshoottime(py.getshoottime()-1300);
+		                    	}
+	                    	}
+	                    	py.PoisonSwitch(false);
+	                    }
+	                    else if (map.getTile(x, y)==resourceManager.getTileType('L'-'A')){
+	                    	// bomb
+	                    	py.PoisonSwitch(true);
+	                    	if(!py.IsInvinc()){
+	                    		map.setTile(x, y, resourceManager.getTileType(1));
+	                    		py.lossHealth(10);
+	                    		Starbuf.Expo stbf = (Starbuf.Expo)resourceManager.expoSprite.clone();
+	                    		stbf.setX(py.getX());
+	                    		stbf.setY(py.getY());
+	                    		map.addTmpBullet(stbf);
+	                    	}
+	                    }
+	                    else if (map.getTile(x, y)==resourceManager.getTileType('M'-'A')){
+	                    	// bomb
+	                    	py.PoisonSwitch(true);
+	                    	if(!py.IsInvinc()){
+	                    		map.setTile(x, y, resourceManager.getTileType(8));
+	                    		py.lossHealth(10);
+	                    		Starbuf.Expo stbf = (Starbuf.Expo)resourceManager.expoSprite.clone();
+	                    		stbf.setX(py.getX());
+	                    		stbf.setY(py.getY());
+	                    		map.addTmpBullet(stbf);
+	                    	}
+	                    }else{
+	                    	py.PoisonSwitch(true);
+	                    }
+                    }
                     return pointCache;
                 }
             }
@@ -334,6 +403,10 @@ public class MainGameState implements GameState {
             	st.life-=elapsedTime;
             	if(st.life<=0){
             		i.remove();
+            	}
+            	if (sprite instanceof Starbuf.Pois){
+            		sprite.setX(player.getX());
+            		sprite.setY(player.getY());
             	}
             }
             // normal update
@@ -573,7 +646,7 @@ public class MainGameState implements GameState {
         if(player.IsInvinc()){
         	if(player.IsInvincBuf()){
         		player.RefillInvBuf();
-        		Starbuf stbf = (Starbuf)resourceManager.starbufSprite.clone();
+        		Starbuf.StarB stbf = (Starbuf.StarB)resourceManager.starbufSprite.clone();
         		stbf.setX(player.getX()+player.getWidth()/2);
         		stbf.setY(player.getY()-15);
         		map.addTmpBullet(stbf);

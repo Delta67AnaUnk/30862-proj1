@@ -23,4 +23,23 @@ public class Starbuf extends Sprite{
             return null;
         }
 	}
+	
+	public static class StarB extends Starbuf {
+        public StarB(Animation anim,long lf) {
+            super(anim, lf);
+        }
+    }
+	
+	public static class Expo extends Starbuf {
+		public Expo(Animation anim,long lf) {
+            super(anim, lf);
+        }
+	}
+	
+	public static class Pois extends Starbuf{
+		public Pois(Animation anim, long lf){
+			super(anim, lf);
+		}
+	}
+	
 }
