@@ -359,6 +359,7 @@ public class MainGameState implements GameState {
         	if(victim!=null){
         		creature.setState(Creature.STATE_DYING);
         		victim.setState(Creature.STATE_DYING);
+        		py.addHealth(10);
         	}
         }
         
@@ -598,6 +599,7 @@ public class MainGameState implements GameState {
 	                badguy.setState(Creature.STATE_DYING);
 	                player.setY(badguy.getY() - player.getHeight());
 	                player.jump(true);
+                	player.addHealth(10);
 	            }
 	            else {
 	                // player dies!
