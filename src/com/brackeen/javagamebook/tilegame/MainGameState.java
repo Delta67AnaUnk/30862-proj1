@@ -306,6 +306,7 @@ public class MainGameState implements GameState {
             p.holdSwitch(false);
             p.setshoottime(0);
             p.ShootSwitch(false);
+            p.SetInvinc(false);
             return;
         }
 
@@ -328,6 +329,12 @@ public class MainGameState implements GameState {
                 else {
                     updateCreature(creature, elapsedTime);
                 }
+            } else if (sprite instanceof Starbuf) {
+            	Starbuf st = (Starbuf)sprite;
+            	st.life-=elapsedTime;
+            	if(st.life<=0){
+            		i.remove();
+            	}
             }
             // normal update
             sprite.update(elapsedTime);
@@ -345,6 +352,7 @@ public class MainGameState implements GameState {
         long elapsedTime)
     {
     	Player py = (Player)map.getPlayer();
+    	py.UpdateInv(elapsedTime);
     	// Bullet Shot on Victim
         if (creature instanceof Bullet){
         	Creature victim = checkBulletCollision((Bullet)creature);
@@ -561,31 +569,42 @@ public class MainGameState implements GameState {
         if (collisionSprite instanceof PowerUp) {
             acquirePowerUp((PowerUp)collisionSprite);
         }
-        else if(collisionSprite instanceof Bullet){
-        	Bullet bt = (Bullet)collisionSprite;
-        	if(bt.isAlive()==true){
-	        	if(bt.getOwner()==false){
-	        		bt.setState(Creature.STATE_DYING);
-	        		player.lossHealth(5);
-	        		if(!player.isAlive())soundManager.play(SelfDeadSE);
-	        		//soundManager.play(HitSE);
-	        	}
+        if(player.IsInvinc()){
+        	if(player.IsInvincBuf()){
+        		player.RefillInvBuf();
+        		Starbuf stbf = (Starbuf)resourceManager.starbufSprite.clone();
+        		stbf.setX(player.getX()+player.getWidth()/2);
+        		stbf.setY(player.getY()-15);
+        		map.addTmpBullet(stbf);
         	}
-        }
-        else if (collisionSprite instanceof Creature) {
-            Creature badguy = (Creature)collisionSprite;
-            if (canKill) {
-                // kill the badguy and make player bounce
-                soundManager.play(boopSound);
-                badguy.setState(Creature.STATE_DYING);
-                player.setY(badguy.getY() - player.getHeight());
-                player.jump(true);
-            }
-            else {
-                // player dies!
-            	soundManager.play(SelfDeadSE);
-                player.setState(Creature.STATE_DYING);
-            }
+        }else{
+        	
+	        if(collisionSprite instanceof Bullet){
+	        	Bullet bt = (Bullet)collisionSprite;
+	        	if(bt.isAlive()==true){
+		        	if(bt.getOwner()==false){
+		        		bt.setState(Creature.STATE_DYING);
+		        		player.lossHealth(5);
+		        		if(!player.isAlive())soundManager.play(SelfDeadSE);
+		        		//soundManager.play(HitSE);
+		        	}
+	        	}
+	        }
+	        else if (collisionSprite instanceof Creature) {
+	            Creature badguy = (Creature)collisionSprite;
+	            if (canKill) {
+	                // kill the badguy and make player bounce
+	                soundManager.play(boopSound);
+	                badguy.setState(Creature.STATE_DYING);
+	                player.setY(badguy.getY() - player.getHeight());
+	                player.jump(true);
+	            }
+	            else {
+	                // player dies!
+	            	soundManager.play(SelfDeadSE);
+	                player.setState(Creature.STATE_DYING);
+	            }
+	        }
         }
     }
 
@@ -597,9 +616,10 @@ public class MainGameState implements GameState {
     public void acquirePowerUp(PowerUp powerUp) {
         // remove it from the map
         map.removeSprite(powerUp);
-
+        Player py = (Player)map.getPlayer();
         if (powerUp instanceof PowerUp.Star) {
             // do something here, like give the player points
+        	py.SetInvinc(true);
             soundManager.play(prizeSound);
         }
         else if (powerUp instanceof PowerUp.Music) {
@@ -612,6 +632,10 @@ public class MainGameState implements GameState {
             soundManager.play(prizeSound,
                 new EchoFilter(2000, .7f), false);
             map = resourceManager.loadNextMap();
+        }
+        else if (powerUp instanceof PowerUp.Mushroom) {
+        	soundManager.play(prizeSound);
+        	py.addHealth(5);
         }
     }
 
