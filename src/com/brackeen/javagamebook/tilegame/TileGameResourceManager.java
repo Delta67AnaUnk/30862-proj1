@@ -4,6 +4,7 @@ import java.awt.*;
 import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 import com.brackeen.javagamebook.graphics.*;
 import com.brackeen.javagamebook.tilegame.sprites.*;
@@ -21,6 +22,7 @@ public class TileGameResourceManager extends ResourceManager {
 
     private ArrayList tiles;
     private int currentMap;
+    private String Mapname;
 
     // host sprites used for cloning
     private Sprite playerSprite;
@@ -41,9 +43,10 @@ public class TileGameResourceManager extends ResourceManager {
         GraphicsConfiguration.
     */
     public TileGameResourceManager(GraphicsConfiguration gc,
-        SoundManager soundManager, MidiPlayer midiPlayer)
+        SoundManager soundManager, MidiPlayer midiPlayer, String Map)
     {
         super(gc, soundManager, midiPlayer);
+        Mapname = "maps/"+Map;
     }
 
 
@@ -60,7 +63,7 @@ public class TileGameResourceManager extends ResourceManager {
             currentMap++;
             try {
                 map = loadMap(
-                    "maps/map" + currentMap + ".txt");
+                    Mapname + currentMap + ".txt");
             }
             catch (IOException ex) {
                 if (currentMap == 1) {
@@ -79,7 +82,7 @@ public class TileGameResourceManager extends ResourceManager {
     public TileMap reloadMap() {
         try {
         	return loadMap(
-                "maps/map" + currentMap + ".txt");
+                Mapname + currentMap + ".txt");
         }
         catch (IOException ex) {
             ex.printStackTrace();

@@ -1,7 +1,10 @@
 package com.brackeen.javagamebook.tilegame;
 
 import java.awt.Graphics2D;
+import java.io.File;
+import java.util.Scanner;
 import java.util.logging.*;
+
 import javax.sound.sampled.AudioFormat;
 
 import com.brackeen.javagamebook.sound.MidiPlayer;
@@ -26,7 +29,7 @@ public class GameManager extends GameCore {
     private static final AudioFormat PLAYBACK_FORMAT =
         new AudioFormat(44100, 16, 1, true, false);
     	
-
+    private String Mapname;
     private MidiPlayer midiPlayer;
     private SoundManager soundManager;
     private ResourceManager resourceManager;
@@ -35,6 +38,12 @@ public class GameManager extends GameCore {
     private TimeSmoothie timeSmoothie = new TimeSmoothie();
 
     public void init() {
+    	System.out.println("Enter map name: (The Nth map of the series is maps/MAPNAME#N.txt)");
+        Scanner sc = new Scanner(System.in);
+        Mapname = sc.nextLine();
+        if(Mapname.equals("")) Mapname = "map";
+        sc.close();
+        
         log.setLevel(Level.INFO);
 
         log.info("init sound manager");
@@ -55,7 +64,7 @@ public class GameManager extends GameCore {
         log.info("init resource manager");
         resourceManager = new TileGameResourceManager(
             screen.getFullScreenWindow().getGraphicsConfiguration(),
-            soundManager, midiPlayer);
+            soundManager, midiPlayer,Mapname);
 
 
         log.info("init game states");
