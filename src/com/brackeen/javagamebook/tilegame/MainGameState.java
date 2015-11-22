@@ -37,6 +37,8 @@ public class MainGameState implements GameState {
     private Sound ShootSE;
     private Sound MultShootSE;
     private Sound SelfDeadSE;
+    private Sound BombSE;
+    private Sound MushSE;
     private TileMap map;
     private TileMapRenderer renderer;
 
@@ -96,6 +98,8 @@ public class MainGameState implements GameState {
         MultShootSE = resourceManager.loadSound("sounds/Shooting.wav");
         KillSE = resourceManager.loadSound("sounds/kl.wav");
         SelfDeadSE = resourceManager.loadSound("sounds/ahaha.wav");
+        BombSE = resourceManager.loadSound("sounds/bomb.wav");
+        MushSE = resourceManager.loadSound("sounds/eat.wav");
         music = resourceManager.loadSequence("sounds/music.midi");
     }
 
@@ -184,6 +188,7 @@ public class MainGameState implements GameState {
                 		stopbuf.setX(player.getX());
                 		stopbuf.setY(player.getY());
                 		map.addTmpBullet(stopbuf);
+                		
 	            	}else{
 	            		player.ShootSwitch(false);
 	            		player.setshoottime(0);
@@ -242,6 +247,7 @@ public class MainGameState implements GameState {
 		                    		py.setshoottime(0);
 		                    		py.holdSwitch(true);
 		                    		py.ShootSwitch(true);
+		                    		py.clearcount();
 			                    	stopbuf = (Starbuf.Pois)resourceManager.stopSprite.clone();
 			                		stopbuf.setX(py.getX());
 			                		stopbuf.setY(py.getY());
@@ -259,6 +265,7 @@ public class MainGameState implements GameState {
 		                    		py.setshoottime(0);
 		                    		py.holdSwitch(true);
 		                    		py.ShootSwitch(true);
+		                    		py.clearcount();
 			                    	stopbuf = (Starbuf.Pois)resourceManager.stopSprite.clone();
 			                		stopbuf.setX(py.getX());
 			                		stopbuf.setY(py.getY());
@@ -275,10 +282,12 @@ public class MainGameState implements GameState {
 	                    	if(!py.IsInvinc()){
 	                    		map.setTile(x, y, resourceManager.getTileType(1));
 	                    		py.lossHealth(10);
+	                    		if(!py.isAlive()) soundManager.play(SelfDeadSE);
 	                    		Starbuf.Expo stbf = (Starbuf.Expo)resourceManager.expoSprite.clone();
 	                    		stbf.setX(py.getX());
 	                    		stbf.setY(py.getY());
 	                    		map.addTmpBullet(stbf);
+	                    		soundManager.play(BombSE);
 	                    	}
 	                    }
 	                    else if (map.getTile(x, y)==resourceManager.getTileType('M'-'A')){
@@ -287,10 +296,12 @@ public class MainGameState implements GameState {
 	                    	if(!py.IsInvinc()){
 	                    		map.setTile(x, y, resourceManager.getTileType(8));
 	                    		py.lossHealth(10);
+	                    		if(!py.isAlive()) soundManager.play(SelfDeadSE);
 	                    		Starbuf.Expo stbf = (Starbuf.Expo)resourceManager.expoSprite.clone();
 	                    		stbf.setX(py.getX());
 	                    		stbf.setY(py.getY());
 	                    		map.addTmpBullet(stbf);
+	                    		soundManager.play(BombSE);
 	                    	}
 	                    }else{
 	                    	py.PoisonSwitch(true);
@@ -425,7 +436,7 @@ public class MainGameState implements GameState {
         long elapsedTime)
     {
     	Player py = (Player)map.getPlayer();
-    	py.UpdateInv(elapsedTime);
+    	if(creature instanceof Player) py.UpdateInv(elapsedTime);
     	// Bullet Shot on Victim
         if (creature instanceof Bullet){
         	Creature victim = checkBulletCollision((Bullet)creature);
@@ -470,10 +481,8 @@ public class MainGameState implements GameState {
         float dx = creature.getVelocityX();
         float oldX = creature.getX();
         float newX = oldX + dx * elapsedTime;
-        
-        
-        Point tile =
-            getTileCollision(creature, newX, creature.getY());
+         
+        Point tile = getTileCollision(creature, newX, creature.getY());
         if (tile == null) {
             creature.setX(newX);
         }
@@ -507,6 +516,13 @@ public class MainGameState implements GameState {
         float oldY = creature.getY();
         float newY = oldY + dy * elapsedTime;
         tile = getTileCollision(creature, creature.getX(), newY);
+        if(newY > map.getHeight()*64+32){
+        	creature.setState(Creature.STATE_DYING);
+        	if(creature instanceof Player&& !map.ifDropped()){
+        		soundManager.play(SelfDeadSE);
+        		map.Drop();
+        	}
+        }
         if (tile == null) {
             creature.setY(newY);
         }
@@ -550,7 +566,7 @@ public class MainGameState implements GameState {
         if (creature.isShooting()){
         	creature.setshoottime(creature.getshoottime()+elapsedTime);
         	if(creature instanceof Player){
-    			if(py.isHold()&&py.getcount()>=0){
+    			if(py.isHold()&&py.getcount()>0){
     				if(py.getshoottime()>(10-py.getcount())*100){
     					Bullet pshoot = (Bullet)resourceManager.bulletSprite.clone();
     					pshoot.setX(py.getX());
@@ -608,16 +624,18 @@ public class MainGameState implements GameState {
         while (i.hasNext()) {
             Sprite otherSprite = (Sprite)i.next();
             if (isCollision(bullet, otherSprite)) {
-                // collision found, return the Sprite
-            	if(owner){ // user shoot
-            		if(otherSprite instanceof Fly|| otherSprite instanceof Grub){
-            			soundManager.play(KillSE);
-            			return (Creature)otherSprite;
-            		}
-            	}else{
-            		if(otherSprite instanceof Player){
-            			return (Creature)otherSprite;
-            		}
+            	if(!(otherSprite instanceof Starbuf)){
+	                // collision found, return the Sprite
+	            	if(owner){ // user shoot
+	            		if(otherSprite instanceof Fly|| otherSprite instanceof Grub){
+	            			soundManager.play(KillSE);
+	            			return (Creature)otherSprite;
+	            		}
+	            	}else{
+	            		if(otherSprite instanceof Player){
+	            			return (Creature)otherSprite;
+	            		}
+	            	}
             	}
             }
         }
@@ -651,16 +669,17 @@ public class MainGameState implements GameState {
         		stbf.setY(player.getY()-15);
         		map.addTmpBullet(stbf);
         	}
+        	
         }else{
         	
 	        if(collisionSprite instanceof Bullet){
+	        	
 	        	Bullet bt = (Bullet)collisionSprite;
 	        	if(bt.isAlive()==true){
 		        	if(bt.getOwner()==false){
 		        		bt.setState(Creature.STATE_DYING);
 		        		player.lossHealth(5);
 		        		if(!player.isAlive())soundManager.play(SelfDeadSE);
-		        		//soundManager.play(HitSE);
 		        	}
 	        	}
 	        }
@@ -709,6 +728,7 @@ public class MainGameState implements GameState {
             map = resourceManager.loadNextMap();
         }
         else if (powerUp instanceof PowerUp.Mushroom) {
+        	soundManager.play(MushSE);
         	soundManager.play(prizeSound);
         	py.addHealth(5);
         }

@@ -18,6 +18,7 @@ public class TileMap {
     private LinkedList sprites;
     private Sprite player;
     private LinkedList<Sprite> tmpbullets;
+    private boolean Dropped;
     /**
         Creates a new TileMap with the specified width and
         height (in number of tiles) of the map.
@@ -26,8 +27,16 @@ public class TileMap {
         tiles = new Image[width][height];
         sprites = new LinkedList();
         tmpbullets = new LinkedList<Sprite>();
+        Dropped = false;
     }
 
+    public boolean ifDropped(){
+    	return Dropped;
+    }
+    
+    public void Drop(){
+    	Dropped = true;
+    }
 
     /**
         Gets the width of this TileMap (number of tiles across).
